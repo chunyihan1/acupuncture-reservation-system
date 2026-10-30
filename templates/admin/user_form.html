@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} · 针灸预约系统{% endblock %}
+
+{% block content %}
+<div class="container page-shell">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Account administration</div>
+      <h1 class="page-title">{{ title }}</h1>
+      <p class="page-sub">{% if is_create %}创建后可立即使用账号登录，密码采用加盐哈希存储。{% else %}修改账号资料与角色；停用后该账号无法登录。{% endif %}</p>
+    </div>
+    <a href="{% url 'admin_users' %}" class="btn btn-sm btn-ghost"><i class="bi bi-arrow-left"></i> 返回账号列表</a>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-8">
+      <div class="panel">
+        <div class="panel-head"><h2>账号信息</h2></div>
+        <div class="panel-body">
+          <form method="post" novalidate>
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+              <div class="alert alert-danger py-2" style="font-size:.82rem">{{ form.non_field_errors.0 }}</div>
+            {% endif %}
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="{{ form.username.id_for_label }}">登录账号</label>
+                {{ form.username }}
+                {% for error in form.username.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="{{ form.name.id_for_label }}">真实姓名</label>
+                {{ form.name }}
+                {% for error in form.name.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="{{ form.phone.id_for_label }}">联系电话</label>
+                {{ form.phone }}
+                {% for error in form.phone.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="{{ form.gender.id_for_label }}">性别</label>
+                {{ form.gender }}
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="{{ form.role.id_for_label }}">角色</label>
+                {{ form.role }}
+                {% for error in form.role.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+              </div>
+              {% if is_create %}
+                <div class="col-12 col-md-6">
+                  <label class="form-label" for="{{ form.password.id_for_label }}">初始密码</label>
+                  {{ form.password }}
+                  {% for error in form.password.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+                  <div class="form-text">不少于 8 位，建议包含字母与数字。</div>
+                </div>
+                <div class="col-12"><hr class="my-1"><div class="text-muted-soft" style="font-size:.76rem">若角色为针灸医师，请填写以下执业资料</div></div>
+                <div class="col-12 col-md-4">
+                  <label class="form-label" for="{{ form.department.id_for_label }}">所属科室</label>
+                  {{ form.department }}
+                </div>
+                <div class="col-12 col-md-4">
+                  <label class="form-label" for="{{ form.title.id_for_label }}">职称</label>
+                  {{ form.title }}
+                </div>
+                <div class="col-12 col-md-4">
+                  <label class="form-label" for="{{ form.specialty.id_for_label }}">擅长方向</label>
+                  {{ form.specialty }}
+                </div>
+              {% else %}
+                <div class="col-12 col-md-6">
+                  <label class="form-label" for="{{ form.id_card.id_for_label }}">身份证号</label>
+                  {{ form.id_card }}
+                  <div class="form-text">列表页与日志中自动脱敏展示。</div>
+                </div>
+                <div class="col-12 col-md-6 d-flex align-items-end">
+                  <div class="form-check form-switch mb-2">
+                    {{ form.is_active }}
+                    <label class="form-check-label" for="{{ form.is_active.id_for_label }}">账号启用</label>
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+            <button type="submit" class="btn btn-jade mt-3 px-4">{% if is_create %}创建账号{% else %}保存修改{% endif %}</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-4">
+      <div class="panel">
+        <div class="panel-head"><h2>权限说明</h2></div>
+        <div class="panel-body" style="font-size:.82rem;color:var(--ink-soft)">
+          <p><strong>就诊患者</strong>：预约、取消预约、查看本人档案。</p>
+          <p><strong>针灸医师</strong>：接诊、制定方案、录入记录、查看本人患者。</p>
+          <p><strong>门诊管理员</strong>：账号、排班、预约、记录审核、统计。</p>
+          <p class="mb-0"><strong>系统运维/教学管理员</strong>：包含管理员权限，并可审计操作日志。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

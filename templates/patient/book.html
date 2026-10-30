@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}提交预约 · 针灸预约系统{% endblock %}
+
+{% block content %}
+<div class="container page-shell">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Step 3 / 3</div>
+      <h1 class="page-title">确认预约信息</h1>
+      <p class="page-sub">请核对医师与就诊时段，填写主诉后提交。提交成功后将等待医师排期确认。</p>
+    </div>
+    <a href="{% url 'doctor_schedules' doctor.pk %}" class="btn btn-sm btn-ghost"><i class="bi bi-arrow-left"></i> 重新选择时段</a>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-5">
+      <div class="panel">
+        <div class="panel-head"><h2>就诊信息</h2></div>
+        <div class="panel-body">
+          <dl class="detail-list mb-0">
+            <dt>接诊医师</dt>
+            <dd>{{ doctor.display_name }}（{{ doctor.doctor_profile.department|default:"针灸科" }}）</dd>
+            <dt>出诊日期</dt>
+            <dd>{{ schedule.date|date:"Y-m-d" }}</dd>
+            <dt>就诊时段</dt>
+            <dd>{{ schedule.time_range }}</dd>
+            <dt>剩余号源</dt>
+            <dd>{{ schedule.remaining }} / {{ schedule.capacity }}</dd>
+            <dt>治疗室</dt>
+            <dd>{{ doctor.doctor_profile.room.name|default:"门诊针灸治疗室" }}</dd>
+          </dl>
+          <div class="alert alert-light border mt-3 mb-0" style="font-size:.78rem">
+            <i class="bi bi-info-circle me-1"></i> 同一时段不可重复预约；如需变更请先取消原预约。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-7">
+      <div class="panel">
+        <div class="panel-head"><h2>填写主诉</h2></div>
+        <div class="panel-body">
+          <form method="post" novalidate>
+            {% csrf_token %}
+            <div class="mb-3">
+              <label class="form-label" for="{{ form.chief_complaint.id_for_label }}">主诉症状</label>
+              {{ form.chief_complaint }}
+              {% for error in form.chief_complaint.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+              <div class="form-text">简要描述不适部位、持续时间与诱因，便于医师提前了解病情。</div>
+            </div>
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-jade px-4">提交预约</button>
+              <a href="{% url 'doctor_list' %}" class="btn btn-ghost">取消</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}{{ doctor.display_name }} 排班 · 针灸预约系统{% endblock %}
+
+{% block content %}
+<div class="container page-shell">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Doctor schedule</div>
+      <h1 class="page-title">{{ doctor.display_name }} 的出诊排班</h1>
+      <p class="page-sub">
+        {{ doctor.doctor_profile.department|default:"针灸科" }}
+        {% if doctor.doctor_profile.title %} · {{ doctor.doctor_profile.title }}{% endif %}
+        {% if doctor.doctor_profile.specialty %} · 擅长 {{ doctor.doctor_profile.specialty }}{% endif %}
+      </p>
+    </div>
+    <a href="{% url 'doctor_list' %}" class="btn btn-sm btn-ghost"><i class="bi bi-arrow-left"></i> 返回医师列表</a>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2>未来 14 天可预约时段</h2>
+      <span class="text-muted-soft" style="font-size:.78rem">号源实时校验，提交后进入待排期</span>
+    </div>
+    <div class="panel-body">
+      {% for day in grouped %}
+        <div class="mb-3 pb-3 {% if not forloop.last %}border-bottom{% endif %}">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <strong style="font-family:'Songti SC',serif">{{ day.date|date:"Y-m-d" }}</strong>
+            <span class="role-badge">{{ day.weekday }}</span>
+          </div>
+          <div>
+            {% for schedule in day.schedules %}
+              {% if schedule.is_bookable %}
+                <a class="slot-pill available" href="{% url 'book_appointment' schedule.pk %}">
+                  <i class="bi bi-clock"></i> {{ schedule.time_range }}
+                  <small>余 {{ schedule.remaining }} / {{ schedule.capacity }}</small>
+                </a>
+              {% else %}
+                <span class="slot-pill full"><i class="bi bi-clock"></i> {{ schedule.time_range }} <small>已满</small></span>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      {% empty %}
+        <div class="empty-state">
+          <i class="bi bi-calendar-x empty-icon"></i>
+          该医师近期暂无可用排班，请稍后再试。
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

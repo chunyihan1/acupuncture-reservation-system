@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}{{ patient.display_name }} 的历史档案 · 针灸预约系统{% endblock %}
+
+{% block content %}
+<div class="container page-shell">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Patient history</div>
+      <h1 class="page-title">{{ patient.display_name }} 的针灸档案</h1>
+      <p class="page-sub">{{ patient.get_gender_display }} · 就诊 {{ appointments|length }} 次 · 治疗记录 {{ records|length }} 条</p>
+    </div>
+    <a href="{% url 'doctor_patients' %}" class="btn btn-sm btn-ghost"><i class="bi bi-arrow-left"></i> 返回患者列表</a>
+    <a href="{% url 'patient_history' patient.pk %}" class="btn btn-sm btn-ghost"><i class="bi bi-journal-check"></i> 查看全部记录</a>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-7">
+      <div class="panel mb-3">
+        <div class="panel-head"><h2>历史预约</h2></div>
+        <div class="panel-body flush">
+          <table class="table align-middle">
+            <thead><tr><th>预约时间</th><th>主诉</th><th>状态</th><th class="text-end">操作</th></tr></thead>
+            <tbody>
+              {% for appointment in appointments %}
+                <tr>
+                  <td>{{ appointment.appoint_time|date:"Y-m-d H:i" }}</td>
+                  <td style="max-width:220px">{{ appointment.chief_complaint|default:"—"|truncatechars:30 }}</td>
+                  <td><span class="badge-status tone-{{ appointment.status_tone }}">{{ appointment.get_status_display }}</span></td>
+                  <td class="text-end"><a href="{% url 'doctor_appointment_detail' appointment.pk %}" class="btn btn-sm btn-ghost">接诊单</a></td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="4"><div class="empty-state py-4">暂无预约记录</div></td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>治疗记录</h2></div>
+        <div class="panel-body flush">
+          <table class="table align-middle">
+            <thead><tr><th>治疗时间</th><th>辨证</th><th>留针</th><th>状态</th><th class="text-end">操作</th></tr></thead>
+            <tbody>
+              {% for record in records %}
+                <tr>
+                  <td>{{ record.treat_time|date:"Y-m-d H:i" }}</td>
+                  <td>{{ record.plan.syndrome|default:"—" }}</td>
+                  <td>{{ record.needling_duration }} 分钟</td>
+                  <td><span class="badge-status {% if record.status == 'confirmed' %}tone-success{% elif record.status == 'returned' %}tone-danger{% else %}tone-info{% endif %}">{{ record.get_status_display }}</span></td>
+                  <td class="text-end"><a href="{% url 'record_detail' record.pk %}" class="btn btn-sm btn-ghost">查看</a></td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="5"><div class="empty-state py-4">暂无治疗记录</div></td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-5">
+      <div class="panel">
+        <div class="panel-head"><h2>治疗方案</h2><span class="text-muted-soft" style="font-size:.75rem">共 {{ plans|length }} 个</span></div>
+        <div class="panel-body">
+          {% for plan in plans %}
+            <div class="{% if not forloop.last %}border-bottom pb-2 mb-2{% endif %}">
+              <div class="d-flex justify-content-between">
+                <strong style="font-size:.9rem">{{ plan.syndrome|default:"未填写辨证" }}</strong>
+                <span class="text-muted-soft" style="font-size:.74rem">{{ plan.created_at|date:"Y-m-d" }}</span>
+              </div>
+              <div class="cell-sub">{{ plan.technique|default:"—" }} · {{ plan.course_cycle }} 天疗程 · 每周 {{ plan.frequency_per_week }} 次</div>
+              <div class="mt-1">
+                {% for link in plan.main_points.all %}<span class="point-chip">{{ link.acupoint.name }}</span>{% endfor %}
+                {% for link in plan.adjunct_points.all %}<span class="point-chip adjunct">{{ link.acupoint.name }}</span>{% endfor %}
+              </div>
+              <a href="{% url 'doctor_appointment_detail' plan.appointment_id %}" style="font-size:.75rem">查看关联预约 <i class="bi bi-arrow-right"></i></a>
+            </div>
+          {% empty %}
+            <div class="text-muted-soft" style="font-size:.82rem">暂无治疗方案</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

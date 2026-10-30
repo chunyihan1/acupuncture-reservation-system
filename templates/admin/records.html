@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}治疗记录审核 · 针灸预约系统{% endblock %}
+
+{% block content %}
+<div class="container page-shell">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Record audit</div>
+      <h1 class="page-title">治疗记录审核</h1>
+      <p class="page-sub">确认记录后预约主流程推进为“已完成”；退回后由医师重新登记。</p>
+    </div>
+  </div>
+
+  <div class="d-flex flex-wrap gap-2 mb-3">
+    <a href="{% url 'admin_records' %}" class="slot-pill {% if not status %}available{% endif %}">全部</a>
+    {% for value, label in status_choices %}
+      <a href="?status={{ value }}" class="slot-pill {% if status == value %}available{% endif %}">{{ label }}</a>
+    {% endfor %}
+    <form method="get" class="d-flex gap-2 ms-auto">
+      <input type="text" name="q" value="{{ keyword }}" class="form-control form-control-sm" placeholder="患者姓名" style="max-width:180px">
+      <button class="btn btn-sm btn-jade" type="submit">查询</button>
+    </form>
+  </div>
+
+  <div class="panel">
+    <div class="panel-body flush">
+      <table class="table table-hover align-middle">
+        <thead><tr><th>记录编号</th><th>患者</th><th>辨证</th><th>医师</th><th>治疗时间</th><th>状态</th><th class="text-end">审核操作</th></tr></thead>
+        <tbody>
+          {% for record in page_obj %}
+            <tr>
+              <td class="cell-strong">{{ record.record_no }}</td>
+              <td>
+                {{ record.plan.patient.display_name }}
+                <span class="cell-sub">{{ record.plan.plan_no }}</span>
+              </td>
+              <td>{{ record.plan.syndrome|default:"—" }}</td>
+              <td>{{ record.doctor.display_name }}</td>
+              <td>{{ record.treat_time|date:"Y-m-d H:i" }}</td>
+              <td>
+                <span class="badge-status {% if record.status == 'confirmed' %}tone-success{% elif record.status == 'returned' %}tone-danger{% else %}tone-info{% endif %}">{{ record.get_status_display }}</span>
+                {% if record.audit_remark %}<span class="cell-sub">{{ record.audit_remark }}</span>{% endif %}
+              </td>
+              <td class="text-end">
+                <a href="{% url 'record_detail' record.pk %}" class="btn btn-sm btn-ghost">查看</a>
+                {% if record.status == 'registered' %}
+                  <form method="post" action="{% url 'admin_record_audit' record.pk %}" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="remark" value="">
+                    <button type="submit" name="action" value="confirm" class="btn btn-sm btn-jade">确认</button>
+                    <button type="submit" name="action" value="return" class="btn btn-sm btn-outline-danger"
+                            onclick="this.form.remark.value = prompt('请输入退回原因') || '信息不完整，请重新登记';">退回</button>
+                  </form>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="7"><div class="empty-state"><i class="bi bi-clipboard2-check empty-icon"></i>暂无治疗记录</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% include "components/pagination.html" %}
+    </div>
+  </div>
+</div>
+{% endblock %}

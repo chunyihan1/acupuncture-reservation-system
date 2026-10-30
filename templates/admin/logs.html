@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load clinic_extras %}
+{% block title %}操作日志审计 · 针灸预约系统{% endblock %}
+
+{% block content %}
+<div class="container page-shell">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Audit trail</div>
+      <h1 class="page-title">操作日志审计</h1>
+      <p class="page-sub">记录登录、预约、方案、记录与账号维护等关键操作，仅供系统运维管理员查阅。</p>
+    </div>
+  </div>
+
+  <div class="panel mb-3">
+    <div class="panel-body">
+      <form method="get" class="filter-bar">
+        <div>
+          <label class="form-label">操作类型</label>
+          <select name="action" class="form-select">
+            <option value="">全部类型</option>
+            {% for item in actions %}
+              <option value="{{ item }}" {% if action == item %}selected{% endif %}>{{ item }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="form-label">关键词</label>
+          <input type="text" name="q" value="{{ keyword }}" class="form-control" placeholder="对象 / 描述">
+        </div>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-jade">筛选</button>
+          <a href="{% url 'admin_logs' %}" class="btn btn-ghost">重置</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-body flush">
+      <table class="table table-hover align-middle">
+        <thead><tr><th>时间</th><th>操作人</th><th>操作类型</th><th>对象</th><th>描述</th><th>IP</th></tr></thead>
+        <tbody>
+          {% for log in page_obj %}
+            <tr>
+              <td class="cell-strong" style="white-space:nowrap">{{ log.created_at|date:"Y-m-d H:i:s" }}</td>
+              <td>
+                {% if log.user %}
+                  {{ log.user.display_name }}
+                  <span class="cell-sub">{{ log.user.get_role_display }}</span>
+                {% else %}
+                  <span class="text-muted-soft">匿名</span>
+                {% endif %}
+              </td>
+              <td><span class="role-badge">{{ log.action }}</span></td>
+              <td>{{ log.target|default:"—" }}</td>
+              <td style="max-width:260px">{{ log.detail|default:"—" }}</td>
+              <td class="text-muted-soft">{{ log.ip|default:"—" }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6"><div class="empty-state"><i class="bi bi-journal-text empty-icon"></i>暂无操作日志</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% include "components/pagination.html" %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}个人资料 · 针灸预约系统{% endblock %}
+
+{% block content %}
+<div class="container page-shell">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Doctor profile</div>
+      <h1 class="page-title">个人执业资料</h1>
+      <p class="page-sub">维护科室、职称、擅长方向与治疗室信息，患者预约时将展示这些内容。</p>
+    </div>
+    <a href="{% url 'doctor_dashboard' %}" class="btn btn-sm btn-ghost"><i class="bi bi-arrow-left"></i> 返回工作台</a>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-4">
+      <div class="panel">
+        <div class="panel-body text-center">
+          <div class="doctor-avatar mx-auto mb-2" style="width:72px;height:72px;font-size:1.6rem">{{ user.display_name|first }}</div>
+          <h2 style="font-size:1.2rem" class="mb-1">{{ user.display_name }}</h2>
+          <div class="text-muted-soft" style="font-size:.82rem">{{ profile.department }} · {{ profile.title|default:"针灸医师" }}</div>
+          <div class="mt-3 text-start">
+            <dl class="detail-list mb-0">
+              <dt>登录账号</dt><dd>{{ user.username }}</dd>
+              <dt>联系电话</dt><dd>{{ user.phone|default:"—" }}</dd>
+              <dt>治疗室</dt><dd>{{ profile.room.name|default:"未分配" }}</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-8">
+      <div class="panel">
+        <div class="panel-head"><h2>编辑资料</h2></div>
+        <div class="panel-body">
+          <form method="post" novalidate>
+            {% csrf_token %}
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="{{ form.department.id_for_label }}">所属科室</label>
+                {{ form.department }}
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="{{ form.title.id_for_label }}">职称</label>
+                {{ form.title }}
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="{{ form.specialty.id_for_label }}">擅长方向</label>
+                {{ form.specialty }}
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="{{ form.room.id_for_label }}">治疗室</label>
+                {{ form.room }}
+              </div>
+            </div>
+            <button type="submit" class="btn btn-jade mt-3 px-4">保存资料</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

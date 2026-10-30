@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}治疗记录 {{ record.record_no }} · 针灸预约系统{% endblock %}
+
+{% block content %}
+<div class="container page-shell">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Treatment record</div>
+      <h1 class="page-title">{{ record.record_no }}</h1>
+      <p class="page-sub">针灸治疗电子档案 · {{ record.treat_time|date:"Y-m-d H:i" }}</p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <span class="badge-status {% if record.status == 'confirmed' %}tone-success{% elif record.status == 'returned' %}tone-danger{% else %}tone-info{% endif %}">{{ record.get_status_display }}</span>
+      <button onclick="history.back()" class="btn btn-sm btn-ghost"><i class="bi bi-arrow-left"></i> 返回</button>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-5">
+      <div class="panel h-100">
+        <div class="panel-head"><h2>记录信息</h2></div>
+        <div class="panel-body">
+          <dl class="detail-list mb-0">
+            <dt>患者</dt><dd>{{ record.plan.patient.display_name }}</dd>
+            <dt>接诊医师</dt><dd>{{ record.doctor.display_name }}</dd>
+            <dt>实际治疗时间</dt><dd>{{ record.treat_time|date:"Y-m-d H:i" }}</dd>
+            <dt>留针时长</dt><dd>{{ record.needling_duration }} 分钟</dd>
+            <dt>医嘱</dt><dd style="font-weight:400">{{ record.advice|default:"—"|linebreaksbr }}</dd>
+            {% if record.audit_remark %}
+              <dt>审核意见</dt><dd style="font-weight:400">{{ record.audit_remark }}</dd>
+            {% endif %}
+          </dl>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-7">
+      <div class="panel">
+        <div class="panel-head"><h2>治疗方案</h2><span class="text-muted-soft" style="font-size:.75rem">{{ plan.plan_no }}</span></div>
+        <div class="panel-body">
+          <dl class="row detail-list mb-2">
+            <div class="col-6 col-md-4"><dt>辨证结果</dt><dd>{{ plan.syndrome|default:"—" }}</dd></div>
+            <div class="col-6 col-md-4"><dt>针灸手法</dt><dd>{{ plan.technique|default:"—" }}</dd></div>
+            <div class="col-6 col-md-4"><dt>疗程周期</dt><dd>{{ plan.course_cycle }} 天</dd></div>
+            <div class="col-6 col-md-4"><dt>每周频次</dt><dd>{{ plan.frequency_per_week }} 次</dd></div>
+          </dl>
+          <div class="mb-2">
+            <span class="text-muted-soft" style="font-size:.76rem">主穴</span><br>
+            {% for link in main_points %}<span class="point-chip">{{ link.acupoint.name }}</span>{% empty %}<span class="text-muted-soft" style="font-size:.8rem">未设置</span>{% endfor %}
+          </div>
+          <div>
+            <span class="text-muted-soft" style="font-size:.76rem">配穴</span><br>
+            {% for link in adjunct_points %}<span class="point-chip adjunct">{{ link.acupoint.name }}</span>{% empty %}<span class="text-muted-soft" style="font-size:.8rem">未设置</span>{% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

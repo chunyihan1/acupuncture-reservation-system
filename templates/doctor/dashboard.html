@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}医师工作台 · 针灸预约系统{% endblock %}
+
+{% block content %}
+<div class="container page-shell">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">{{ today|date:"Y-m-d" }} · {{ today|date:"l" }}</div>
+      <h1 class="page-title">{{ user.display_name }}，今日诊疗工作台</h1>
+      <p class="page-sub">{{ profile.department }}{% if profile.title %} · {{ profile.title }}{% endif %}{% if profile.room %} · {{ profile.room.name }}{% endif %}</p>
+    </div>
+    <a href="{% url 'doctor_appointments' %}" class="btn btn-jade"><i class="bi bi-list-check"></i> 查看全部预约</a>
+  </div>
+
+  <div class="row g-3 mb-1">
+    <div class="col-6 col-lg-3">
+      <div class="panel stat-card">
+        <div class="stat-icon"><i class="bi bi-calendar2-day"></i></div>
+        <div class="stat-value">{{ stats.today_total }}</div>
+        <div class="stat-label">今日预约</div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="panel stat-card gold">
+        <div class="stat-icon"><i class="bi bi-hourglass-split"></i></div>
+        <div class="stat-value">{{ stats.waiting_confirm }}</div>
+        <div class="stat-label">待排期确认</div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="panel stat-card">
+        <div class="stat-icon"><i class="bi bi-activity"></i></div>
+        <div class="stat-value">{{ stats.in_treatment }}</div>
+        <div class="stat-label">治疗中</div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="panel stat-card">
+        <div class="stat-icon"><i class="bi bi-check2-circle"></i></div>
+        <div class="stat-value">{{ stats.completed }}</div>
+        <div class="stat-label">累计完成</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3 mt-2">
+    <div class="col-12 col-lg-7">
+      <div class="panel h-100">
+        <div class="panel-head">
+          <h2>今日接诊安排</h2>
+          <span class="text-muted-soft" style="font-size:.78rem">共 {{ today_appointments|length }} 位患者</span>
+        </div>
+        <div class="panel-body flush">
+          <table class="table table-hover align-middle">
+            <thead><tr><th>时段</th><th>患者</th><th>主诉</th><th>状态</th><th class="text-end">操作</th></tr></thead>
+            <tbody>
+              {% for appointment in today_appointments %}
+                <tr>
+                  <td class="cell-strong">{{ appointment.appoint_time|time:"H:i" }}</td>
+                  <td>{{ appointment.patient.display_name }}</td>
+                  <td style="max-width:180px">{{ appointment.chief_complaint|default:"—"|truncatechars:28 }}</td>
+                  <td><span class="badge-status tone-{{ appointment.status_tone }}">{{ appointment.get_status_display }}</span></td>
+                  <td class="text-end"><a href="{% url 'doctor_appointment_detail' appointment.pk %}" class="btn btn-sm btn-ghost">接诊</a></td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="5"><div class="empty-state py-4"><i class="bi bi-cup-hot empty-icon"></i>今日暂无预约，可查阅患者档案或维护排班。</div></td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-5">
+      <div class="panel mb-3">
+        <div class="panel-head"><h2>待确认预约</h2><a href="{% url 'doctor_appointments' %}?status=pending" style="font-size:.76rem">查看全部</a></div>
+        <div class="panel-body">
+          {% for appointment in pending %}
+            <div class="d-flex justify-content-between align-items-center py-2 {% if not forloop.last %}border-bottom{% endif %}">
+              <div>
+                <div class="cell-strong">{{ appointment.patient.display_name }}</div>
+                <div class="cell-sub">{{ appointment.appoint_time|date:"m-d H:i" }} · {{ appointment.chief_complaint|default:"未填写主诉"|truncatechars:18 }}</div>
+              </div>
+              <a href="{% url 'doctor_appointment_detail' appointment.pk %}" class="btn btn-sm btn-outline-jade">处理</a>
+            </div>
+          {% empty %}
+            <div class="text-muted-soft" style="font-size:.82rem">暂无待确认预约。</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>近期排班</h2></div>
+        <div class="panel-body">
+          {% for schedule in schedules %}
+            <div class="d-flex justify-content-between py-1" style="font-size:.82rem">
+              <span>{{ schedule.date|date:"m-d" }} {{ schedule.time_range }}</span>
+              <span class="text-muted-soft">余 {{ schedule.remaining }}</span>
+            </div>
+          {% empty %}
+            <div class="text-muted-soft" style="font-size:.82rem">近期暂无排班，请联系管理员维护。</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
