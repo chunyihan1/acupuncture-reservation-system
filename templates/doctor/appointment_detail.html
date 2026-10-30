@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}接诊 {{ appointment.appointment_no }} · 针灸预约系统{% endblock %}
+
+{% block content %}
+<div class="container page-shell">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Consultation</div>
+      <h1 class="page-title">{{ appointment.patient.display_name }} 的接诊单</h1>
+      <p class="page-sub">{{ appointment.appointment_no }} · {{ appointment.appoint_time|date:"Y-m-d H:i" }}</p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <span class="badge-status tone-{{ appointment.status_tone }}">{{ appointment.get_status_display }}</span>
+      <a href="{% url 'doctor_appointments' %}" class="btn btn-sm btn-ghost"><i class="bi bi-arrow-left"></i> 返回队列</a>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-4">
+      <div class="panel mb-3">
+        <div class="panel-head">
+          <h2>患者信息</h2>
+          <a href="{% url 'patient_history' appointment.patient.pk %}" style="font-size:.75rem">历史档案</a>
+        </div>
+        <div class="panel-body">
+          <dl class="detail-list mb-0">
+            <dt>姓名</dt><dd>{{ appointment.patient.display_name }}</dd>
+            <dt>性别</dt><dd>{{ appointment.patient.get_gender_display }}</dd>
+            <dt>联系电话</dt><dd>{{ appointment.patient.phone|default:"—" }}</dd>
+            <dt>主诉症状</dt><dd style="font-weight:400">{{ appointment.chief_complaint|default:"未填写" }}</dd>
+            <dt>预约时段</dt><dd>{{ appointment.appoint_time|date:"Y-m-d H:i" }}</dd>
+          </dl>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>更新预约状态</h2></div>
+        <div class="panel-body">
+          {% if allowed_transitions %}
+            <form method="post" action="{% url 'doctor_transition' appointment.pk %}">
+              {% csrf_token %}
+              <label class="form-label" for="status">目标状态</label>
+              <select name="status" id="status" class="form-select mb-2" required>
+                <option value="">请选择</option>
+                {% for item in allowed_transitions %}
+                  <option value="{{ item.value }}">{{ item.label }}</option>
+                {% endfor %}
+              </select>
+              <label class="form-label" for="reason">备注（可选）</label>
+              <input type="text" name="reason" id="reason" class="form-control mb-3" placeholder="异常退回或取消时建议填写原因">
+              <button type="submit" class="btn btn-jade w-100">确认更新</button>
+            </form>
+          {% else %}
+            <div class="text-muted-soft" style="font-size:.82rem">当前状态无可用流转操作。</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-8">
+      <div class="panel mb-3">
+        <div class="panel-head">
+          <h2>针灸治疗方案</h2>
+          {% if plan %}
+            <a href="{% url 'plan_edit' appointment.pk %}" class="btn btn-sm btn-ghost">编辑方案</a>
+          {% elif appointment.status == "scheduled" or appointment.status == "treating" or appointment.status == "completed" %}
+            <a href="{% url 'plan_edit' appointment.pk %}" class="btn btn-sm btn-jade">制定方案</a>
+          {% endif %}
+        </div>
+        <div class="panel-body">
+          {% if plan %}
+            <dl class="row detail-list mb-2">
+              <div class="col-6 col-md-3"><dt>辨证结果</dt><dd>{{ plan.syndrome|default:"—" }}</dd></div>
+              <div class="col-6 col-md-3"><dt>针灸手法</dt><dd>{{ plan.technique|default:"—" }}</dd></div>
+              <div class="col-6 col-md-3"><dt>疗程周期</dt><dd>{{ plan.course_cycle }} 天</dd></div>
+              <div class="col-6 col-md-3"><dt>每周频次</dt><dd>{{ plan.frequency_per_week }} 次</dd></div>
+            </dl>
+            <div class="row g-2">
+              <div class="col-12 col-md-6">
+                <span class="text-muted-soft" style="font-size:.76rem">主穴</span><br>
+                {% for link in main_points %}<span class="point-chip">{{ link.acupoint.name }}</span>{% empty %}<span class="text-muted-soft" style="font-size:.8rem">未设置</span>{% endfor %}
+              </div>
+              <div class="col-12 col-md-6">
+                <span class="text-muted-soft" style="font-size:.76rem">配穴</span><br>
+                {% for link in adjunct_points %}<span class="point-chip adjunct">{{ link.acupoint.name }}</span>{% empty %}<span class="text-muted-soft" style="font-size:.8rem">未设置</span>{% endfor %}
+              </div>
+            </div>
+            {% if plan.notes %}<div class="alert alert-light border mt-3 mb-0" style="font-size:.82rem">{{ plan.notes }}</div>{% endif %}
+          {% else %}
+            <div class="empty-state py-4">
+              <i class="bi bi-journal-plus empty-icon"></i>
+              尚未制定治疗方案{% if appointment.status == "pending" %}，请先确认排期{% endif %}。
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>治疗记录</h2>
+          {% if plan %}
+            <a href="{% url 'record_create' plan.pk %}" class="btn btn-sm btn-jade">录入治疗记录</a>
+          {% endif %}
+        </div>
+        <div class="panel-body flush">
+          {% if records %}
+            <table class="table align-middle">
+              <thead><tr><th>记录编号</th><th>治疗时间</th><th>留针</th><th>状态</th><th class="text-end">操作</th></tr></thead>
+              <tbody>
+                {% for record in records %}
+                  <tr>
+                    <td class="cell-strong">{{ record.record_no }}</td>
+                    <td>{{ record.treat_time|date:"Y-m-d H:i" }}</td>
+                    <td>{{ record.needling_duration }} 分钟</td>
+                    <td><span class="badge-status {% if record.status == 'confirmed' %}tone-success{% elif record.status == 'returned' %}tone-danger{% else %}tone-info{% endif %}">{{ record.get_status_display }}</span></td>
+                    <td class="text-end"><a href="{% url 'record_detail' record.pk %}" class="btn btn-sm btn-ghost">查看</a></td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+            <div class="empty-state py-4"><i class="bi bi-clipboard2-pulse empty-icon"></i>暂未录入治疗记录</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}穴位维护 · 针灸预约系统{% endblock %}
+
+{% block content %}
+<div class="container page-shell">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Acupoint library</div>
+      <h1 class="page-title">穴位基础数据维护</h1>
+      <p class="page-sub">维护穴位名称、代码、归经与定位，供医师制定治疗方案时选用。</p>
+    </div>
+    <a href="{% url 'admin_acupoint_create' %}" class="btn btn-jade"><i class="bi bi-plus-lg"></i> 新增穴位</a>
+  </div>
+
+  <div class="panel mb-3">
+    <div class="panel-body">
+      <form method="get" class="filter-bar">
+        <div>
+          <label class="form-label">关键词</label>
+          <input type="text" name="q" value="{{ keyword }}" class="form-control" placeholder="穴位名称 / 归经">
+        </div>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-jade">查询</button>
+          <a href="{% url 'admin_acupoints' %}" class="btn btn-ghost">重置</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-body flush">
+      <table class="table table-hover align-middle">
+        <thead><tr><th>穴位</th><th>代码</th><th>归经</th><th>定位</th><th class="text-end">操作</th></tr></thead>
+        <tbody>
+          {% for point in page_obj %}
+            <tr>
+              <td class="cell-strong">{{ point.name }}</td>
+              <td>{{ point.code|default:"—" }}</td>
+              <td><span class="role-badge">{{ point.meridian|default:"未归类" }}</span></td>
+              <td style="max-width:320px">{{ point.location|default:"—" }}</td>
+              <td class="text-end">
+                <a href="{% url 'admin_acupoint_edit' point.pk %}" class="btn btn-sm btn-ghost">编辑</a>
+                <form method="post" action="{% url 'admin_acupoint_delete' point.pk %}" class="d-inline" onsubmit="return confirm('确认删除穴位 {{ point.name }}？')">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-outline-danger">删除</button>
+                </form>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="5"><div class="empty-state"><i class="bi bi-database empty-icon"></i>暂无穴位数据</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% include "components/pagination.html" %}
+    </div>
+  </div>
+</div>
+{% endblock %}

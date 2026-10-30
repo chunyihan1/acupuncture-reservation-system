@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load clinic_extras %}
+{% block title %}预约接诊 · 针灸预约系统{% endblock %}
+
+{% block content %}
+<div class="container page-shell">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Consultation queue</div>
+      <h1 class="page-title">预约接诊</h1>
+      <p class="page-sub">确认排期、开始治疗、录入治疗记录，完成本次诊疗闭环。</p>
+    </div>
+    <a href="{% url 'doctor_patients' %}" class="btn btn-ghost"><i class="bi bi-folder2-open"></i> 患者档案</a>
+  </div>
+
+  <div class="d-flex flex-wrap gap-2 mb-3">
+    <a href="{% url 'doctor_appointments' %}" class="slot-pill {% if not status %}available{% endif %}">全部</a>
+    {% for value, label in status_choices %}
+      <a href="?status={{ value }}" class="slot-pill {% if status == value %}available{% endif %}">{{ label }}</a>
+    {% endfor %}
+  </div>
+
+  <div class="panel">
+    <div class="panel-body flush">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr><th>预约时间</th><th>患者</th><th>联系电话</th><th>主诉</th><th>状态</th><th class="text-end">操作</th></tr>
+        </thead>
+        <tbody>
+          {% for appointment in page_obj %}
+            <tr>
+              <td>
+                <span class="cell-strong">{{ appointment.appoint_time|date:"m-d" }}</span>
+                <span class="cell-sub">{{ appointment.appoint_time|date:"H:i" }}</span>
+              </td>
+              <td>
+                {{ appointment.patient.display_name }}
+                <span class="cell-sub">{{ appointment.patient.get_gender_display }}</span>
+              </td>
+              <td>{{ appointment.patient.phone|mask_phone }}</td>
+              <td style="max-width:220px">{{ appointment.chief_complaint|default:"—"|truncatechars:34 }}</td>
+              <td><span class="badge-status tone-{{ appointment.status_tone }}">{{ appointment.get_status_display }}</span></td>
+              <td class="text-end">
+                <a href="{% url 'doctor_appointment_detail' appointment.pk %}" class="btn btn-sm btn-jade">接诊</a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6"><div class="empty-state"><i class="bi bi-inbox empty-icon"></i>暂无预约记录</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% include "components/pagination.html" %}
+    </div>
+  </div>
+</div>
+{% endblock %}

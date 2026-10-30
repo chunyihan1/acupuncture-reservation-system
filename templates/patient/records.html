@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}治疗档案 · 针灸预约系统{% endblock %}
+
+{% block content %}
+<div class="container page-shell">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">My archives</div>
+      <h1 class="page-title">个人针灸治疗档案</h1>
+      <p class="page-sub">仅展示经医师确认归档的治疗记录，可长期查阅复诊参考。</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-body flush">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>记录编号</th>
+            <th>治疗时间</th>
+            <th>接诊医师</th>
+            <th>辨证结果</th>
+            <th>留针时长</th>
+            <th class="text-end">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for record in page_obj %}
+            <tr>
+              <td class="cell-strong">{{ record.record_no }}</td>
+              <td>{{ record.treat_time|date:"Y-m-d H:i" }}</td>
+              <td>{{ record.doctor.display_name }}</td>
+              <td>{{ record.plan.syndrome|default:"—" }}</td>
+              <td>{{ record.needling_duration }} 分钟</td>
+              <td class="text-end">
+                <a href="{% url 'record_detail' record.pk %}" class="btn btn-sm btn-ghost">查看档案</a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="6">
+                <div class="empty-state">
+                  <i class="bi bi-journal-x empty-icon"></i>
+                  暂无已确认的治疗记录。
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% include "components/pagination.html" %}
+    </div>
+  </div>
+</div>
+{% endblock %}

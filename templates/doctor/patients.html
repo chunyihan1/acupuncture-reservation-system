@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load clinic_extras %}
+{% block title %}患者档案 · 针灸预约系统{% endblock %}
+
+{% block content %}
+<div class="container page-shell">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Patient archives</div>
+      <h1 class="page-title">我的患者档案</h1>
+      <p class="page-sub">仅可查看本人接诊过的患者，防止跨医师越权访问。</p>
+    </div>
+    <form method="get" class="d-flex gap-2">
+      <input type="text" name="q" value="{{ keyword }}" class="form-control" placeholder="姓名 / 电话" style="max-width:200px">
+      <button class="btn btn-jade" type="submit">查询</button>
+    </form>
+  </div>
+
+  <div class="panel">
+    <div class="panel-body flush">
+      <table class="table table-hover align-middle">
+        <thead><tr><th>患者姓名</th><th>性别</th><th>联系电话</th><th>累计接诊</th><th class="text-end">操作</th></tr></thead>
+        <tbody>
+          {% for patient in patients %}
+            <tr>
+              <td class="cell-strong">{{ patient.display_name }}</td>
+              <td>{{ patient.get_gender_display }}</td>
+              <td>{{ patient.phone|mask_phone }}</td>
+              <td>{{ patient.visit_count }} 次</td>
+              <td class="text-end">
+                <a href="{% url 'patient_history' patient.pk %}" class="btn btn-sm btn-ghost">查看档案</a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="5"><div class="empty-state"><i class="bi bi-people empty-icon"></i>暂无接诊患者</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

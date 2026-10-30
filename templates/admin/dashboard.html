@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% block title %}运营数据看板 · 针灸预约系统{% endblock %}
+
+{% block content %}
+<div class="container page-shell">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Operations overview</div>
+      <h1 class="page-title">门诊运营数据看板</h1>
+      <p class="page-sub">汇总预约、治疗与医师接诊数据，辅助门诊排期与资源调配。</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'export_appointments' %}" class="btn btn-ghost"><i class="bi bi-download"></i> 导出预约报表</a>
+      <a href="{% url 'admin_schedules' %}" class="btn btn-jade"><i class="bi bi-calendar-plus"></i> 维护排班</a>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-6 col-lg-2">
+      <div class="panel stat-card"><div class="stat-icon"><i class="bi bi-people"></i></div><div class="stat-value">{{ metrics.total_patients }}</div><div class="stat-label">患者总数</div></div>
+    </div>
+    <div class="col-6 col-lg-2">
+      <div class="panel stat-card gold"><div class="stat-icon"><i class="bi bi-person-badge"></i></div><div class="stat-value">{{ metrics.total_doctors }}</div><div class="stat-label">在册医师</div></div>
+    </div>
+    <div class="col-6 col-lg-2">
+      <div class="panel stat-card"><div class="stat-icon"><i class="bi bi-calendar2-check"></i></div><div class="stat-value">{{ metrics.total_appointments }}</div><div class="stat-label">累计预约</div></div>
+    </div>
+    <div class="col-6 col-lg-2">
+      <div class="panel stat-card"><div class="stat-icon"><i class="bi bi-sun"></i></div><div class="stat-value">{{ metrics.today_appointments }}</div><div class="stat-label">今日预约</div></div>
+    </div>
+    <div class="col-6 col-lg-2">
+      <div class="panel stat-card gold"><div class="stat-icon"><i class="bi bi-hourglass-split"></i></div><div class="stat-value">{{ metrics.pending_appointments }}</div><div class="stat-label">待医师确认</div></div>
+    </div>
+    <div class="col-6 col-lg-2">
+      <div class="panel stat-card"><div class="stat-icon"><i class="bi bi-clipboard2-check"></i></div><div class="stat-value">{{ metrics.total_treatments }}</div><div class="stat-label">已确认治疗</div></div>
+    </div>
+  </div>
+
+  <div class="row g-3 mt-2">
+    <div class="col-12 col-lg-8">
+      <div class="panel h-100">
+        <div class="panel-head"><h2>近 7 天预约趋势</h2><span class="text-muted-soft" style="font-size:.76rem">按就诊日期统计</span></div>
+        <div class="panel-body"><div id="trendChart" class="chart-box"></div></div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-4">
+      <div class="panel h-100">
+        <div class="panel-head"><h2>预约状态分布</h2></div>
+        <div class="panel-body"><div id="statusChart" class="chart-box"></div></div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-6">
+      <div class="panel h-100">
+        <div class="panel-head"><h2>医师接诊量</h2></div>
+        <div class="panel-body"><div id="workloadChart" class="chart-box small"></div></div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-6">
+      <div class="panel h-100">
+        <div class="panel-head"><h2>近 6 个月治疗人次</h2></div>
+        <div class="panel-body"><div id="monthlyChart" class="chart-box small"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel mt-3">
+    <div class="panel-head"><h2>最新预约</h2><a href="{% url 'admin_appointments' %}" style="font-size:.76rem">查看全部</a></div>
+    <div class="panel-body flush">
+      <table class="table table-hover align-middle">
+        <thead><tr><th>预约单号</th><th>患者</th><th>医师</th><th>就诊时间</th><th>状态</th><th class="text-end">操作</th></tr></thead>
+        <tbody>
+          {% for appointment in recent %}
+            <tr>
+              <td class="cell-strong">{{ appointment.appointment_no }}</td>
+              <td>{{ appointment.patient.display_name }}</td>
+              <td>{{ appointment.doctor.display_name }}</td>
+              <td>{{ appointment.appoint_time|date:"Y-m-d H:i" }}</td>
+              <td><span class="badge-status tone-{{ appointment.status_tone }}">{{ appointment.get_status_display }}</span></td>
+              <td class="text-end"><a href="{% url 'appointment_detail' appointment.pk %}" class="btn btn-sm btn-ghost">详情</a></td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6"><div class="empty-state py-4">暂无预约数据</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{{ labels|json_script:"trend-labels" }}
+{{ values|json_script:"trend-values" }}
+{{ status_data|json_script:"status-data" }}
+{{ workload|json_script:"workload-data" }}
+{{ month_labels|json_script:"month-labels" }}
+{{ month_values|json_script:"month-values" }}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+<script>
+  const read = (id) => JSON.parse(document.getElementById(id).textContent);
+  const jade = '#1f6f5c';
+  const gold = '#b4872f';
+  const inkSoft = '#5c6b66';
+  const axisStyle = {
+    axisLine: { lineStyle: { color: '#dbe4e0' } },
+    axisLabel: { color: inkSoft, fontSize: 11 },
+    splitLine: { lineStyle: { color: '#eef2f0' } }
+  };
+
+  const trend = echarts.init(document.getElementById('trendChart'));
+  trend.setOption({
+    grid: { left: 42, right: 18, top: 26, bottom: 30 },
+    tooltip: { trigger: 'axis' },
+    xAxis: { type: 'category', data: read('trend-labels'), axisLine: axisStyle.axisLine, axisLabel: axisStyle.axisLabel },
+    yAxis: { type: 'value', minInterval: 1, ...axisStyle },
+    series: [{
+      type: 'line', data: read('trend-values'), smooth: true, symbolSize: 7,
+      lineStyle: { width: 2.5, color: jade },
+      itemStyle: { color: jade, borderColor: '#fff', borderWidth: 2 },
+      areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+        { offset: 0, color: 'rgba(31,111,92,.18)' }, { offset: 1, color: 'rgba(31,111,92,0)' }
+      ]) }
+    }]
+  });
+
+  const status = echarts.init(document.getElementById('statusChart'));
+  status.setOption({
+    tooltip: { trigger: 'item' },
+    legend: { bottom: 0, itemWidth: 10, itemHeight: 10, textStyle: { fontSize: 11, color: inkSoft } },
+    color: [jade, '#3f8f78', '#6aa792', '#93bfae', '#b8d2c7', '#c9b27e', '#b4872f'],
+    series: [{
+      type: 'pie', radius: ['42%', '66%'], center: ['50%', '44%'],
+      data: read('status-data'),
+      label: { formatter: '{b}\n{c}', fontSize: 11, color: inkSoft },
+      labelLine: { length: 8, length2: 8 }
+    }]
+  });
+
+  const workload = echarts.init(document.getElementById('workloadChart'));
+  workload.setOption({
+    grid: { left: 60, right: 24, top: 18, bottom: 26 },
+    tooltip: { trigger: 'axis' },
+    xAxis: { type: 'value', minInterval: 1, ...axisStyle },
+    yAxis: { type: 'category', data: read('workload-data').map(d => d.name), axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: inkSoft, fontSize: 11 } },
+    series: [{
+      type: 'bar', data: read('workload-data').map(d => d.value),
+      barWidth: 14,
+      itemStyle: {
+        borderRadius: [0, 7, 7, 0],
+        color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+          { offset: 0, color: '#8fc0af' }, { offset: 1, color: jade }
+        ])
+      }
+    }]
+  });
+
+  const monthly = echarts.init(document.getElementById('monthlyChart'));
+  monthly.setOption({
+    grid: { left: 42, right: 18, top: 22, bottom: 30 },
+    tooltip: { trigger: 'axis' },
+    xAxis: { type: 'category', data: read('month-labels'), axisLine: axisStyle.axisLine, axisLabel: axisStyle.axisLabel },
+    yAxis: { type: 'value', minInterval: 1, ...axisStyle },
+    series: [{
+      type: 'bar', data: read('month-values'), barWidth: 20,
+      itemStyle: { borderRadius: [6, 6, 0, 0], color: gold }
+    }]
+  });
+
+  window.addEventListener('resize', function () {
+    [trend, status, workload, monthly].forEach(chart => chart.resize());
+  });
+</script>
+{% endblock %}

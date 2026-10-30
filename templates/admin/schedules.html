@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}排班管理 · 针灸预约系统{% endblock %}
+
+{% block content %}
+<div class="container page-shell">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Schedule administration</div>
+      <h1 class="page-title">医师排班管理</h1>
+      <p class="page-sub">维护医师出诊日期、时段与号源数量，停用时段将不再对患者开放预约。</p>
+    </div>
+    <a href="{% url 'admin_schedule_create' %}" class="btn btn-jade"><i class="bi bi-calendar-plus"></i> 新增排班</a>
+  </div>
+
+  <div class="panel mb-3">
+    <div class="panel-body">
+      <form method="get" class="filter-bar">
+        <div>
+          <label class="form-label">出诊医师</label>
+          <select name="doctor" class="form-select">
+            <option value="">全部医师</option>
+            {% for doctor in doctors %}
+              <option value="{{ doctor.pk }}" {% if doctor_id == doctor.pk|stringformat:"s" %}selected{% endif %}>{{ doctor.display_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-jade">筛选</button>
+          <a href="{% url 'admin_schedules' %}" class="btn btn-ghost">重置</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-body flush">
+      <table class="table table-hover align-middle">
+        <thead><tr><th>日期</th><th>医师</th><th>时段</th><th>号源</th><th>已约</th><th>余量</th><th>状态</th><th class="text-end">操作</th></tr></thead>
+        <tbody>
+          {% for schedule in page_obj %}
+            <tr>
+              <td class="cell-strong">{{ schedule.date|date:"Y-m-d" }}</td>
+              <td>{{ schedule.doctor.display_name }}</td>
+              <td>{{ schedule.time_range }}</td>
+              <td>{{ schedule.capacity }}</td>
+              <td>{{ schedule.booked_count }}</td>
+              <td>{{ schedule.remaining }}</td>
+              <td>
+                {% if schedule.is_active %}
+                  <span class="badge-status tone-success">启用</span>
+                {% else %}
+                  <span class="badge-status tone-muted">停用</span>
+                {% endif %}
+              </td>
+              <td class="text-end">
+                <a href="{% url 'admin_schedule_edit' schedule.pk %}" class="btn btn-sm btn-ghost">编辑</a>
+                <form method="post" action="{% url 'admin_schedule_toggle' schedule.pk %}" class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-ghost">{% if schedule.is_active %}停用{% else %}启用{% endif %}</button>
+                </form>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="8"><div class="empty-state"><i class="bi bi-calendar-x empty-icon"></i>暂无未来排班，请新增排班</div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% include "components/pagination.html" %}
+    </div>
+  </div>
+</div>
+{% endblock %}

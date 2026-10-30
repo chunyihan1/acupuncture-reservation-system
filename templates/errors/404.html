@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}页面不存在 · 针灸预约系统{% endblock %}
+
+{% block content %}
+<div class="container page-shell">
+  <div class="panel" style="max-width:640px;margin:3rem auto">
+    <div class="panel-body text-center py-5">
+      <div class="eyebrow">404 not found</div>
+      <h1 class="page-title mb-2">页面不存在</h1>
+      <p class="text-muted-soft mb-4">您访问的页面可能已被移动或删除。</p>
+      <a href="{% url 'home' %}" class="btn btn-jade">返回首页</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
