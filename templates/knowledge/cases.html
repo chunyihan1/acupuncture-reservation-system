@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}常见病例方案 · 针灸预约系统{% endblock %}
+
+{% block content %}
+<div class="container page-shell">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Clinical knowledge</div>
+      <h1 class="page-title">常见病例针灸治疗方案</h1>
+      <p class="page-sub">收录 {{ cases|length }} 个常见病例的辨证要点、主配穴与疗程建议，可与 {{ point_count }} 个穴位速查条目联动参考。</p>
+    </div>
+    <a href="{% url 'knowledge_acupoints' %}" class="btn btn-jade"><i class="bi bi-search"></i> 穴位速查</a>
+  </div>
+
+  <div class="panel mb-3">
+    <div class="panel-body">
+      <form method="get" class="filter-bar">
+        <div>
+          <label class="form-label">关键词</label>
+          <input type="text" name="q" value="{{ keyword }}" class="form-control" placeholder="病例 / 辨证 / 症状 / 穴位">
+        </div>
+        <div>
+          <label class="form-label">科别</label>
+          <select name="category" class="form-select">
+            <option value="">全部科别</option>
+            {% for item in categories %}
+              <option value="{{ item }}" {% if item == category %}selected{% endif %}>{{ item }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-jade">查询</button>
+          <a href="{% url 'knowledge_cases' %}" class="btn btn-ghost">重置</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    {% for case in cases %}
+      <div class="col-12 col-xl-6">
+        <div class="panel case-card">
+          <div class="panel-body">
+            <div class="d-flex justify-content-between align-items-start gap-2">
+              <h3 class="case-title">{{ case.name }}</h3>
+              <span class="role-badge">{{ case.category|default:"未分类" }}</span>
+            </div>
+
+            <div class="case-line"><i class="bi bi-diagram-3"></i><span>常见辨证：{{ case.syndrome|default:"—" }}</span></div>
+            <p class="case-symptoms">{{ case.symptoms|default:"—" }}</p>
+
+            <div class="case-block">
+              <div class="case-label">主穴</div>
+              {% for point in case.main_points.all %}
+                <span class="point-chip">{{ point.name }}</span>
+              {% empty %}
+                <span class="text-muted-soft">—</span>
+              {% endfor %}
+            </div>
+            <div class="case-block">
+              <div class="case-label">配穴</div>
+              {% for point in case.adjunct_points.all %}
+                <span class="point-chip adjunct">{{ point.name }}</span>
+              {% empty %}
+                <span class="text-muted-soft">—</span>
+              {% endfor %}
+            </div>
+
+            <div class="case-meta">
+              <span><i class="bi bi-hand-index-thumb"></i>{{ case.technique|default:"—" }}</span>
+              <span><i class="bi bi-calendar3"></i>疗程 {{ case.course_cycle }} 天</span>
+              <span><i class="bi bi-arrow-repeat"></i>每周 {{ case.frequency_per_week }} 次</span>
+            </div>
+
+            {% if case.notes %}
+              <div class="case-notes"><i class="bi bi-lightbulb"></i>{{ case.notes }}</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-12">
+        <div class="panel">
+          <div class="empty-state">
+            <i class="bi bi-journal-x empty-icon"></i>
+            没有匹配的病例方案，请调整关键词或科别筛选。
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <p class="knowledge-note">
+    <i class="bi bi-info-circle"></i>
+    方案为常见证型的通用思路，临床须结合患者个体情况辨证加减，并由执业医师实施。
+  </p>
+</div>
+{% endblock %}

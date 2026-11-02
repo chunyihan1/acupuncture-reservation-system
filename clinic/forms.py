@@ -214,7 +214,8 @@ class UserEditForm(StyledFormMixin, forms.ModelForm):
 class AcupointForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = Acupoint
-        fields = ("name", "code", "meridian", "location")
+        fields = ("name", "code", "meridian", "location", "indications")
+        widgets = {"indications": forms.Textarea(attrs={"rows": 3})}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -288,6 +288,7 @@ class Acupoint(models.Model):
     code = models.CharField("穴位代码", max_length=20, blank=True)
     meridian = models.CharField("归经", max_length=50, blank=True)
     location = models.CharField("定位", max_length=200, blank=True)
+    indications = models.TextField("主治病症", blank=True)
     is_deleted = models.BooleanField("已删除", default=False)
     created_at = models.DateTimeField("创建时间", auto_now_add=True)
     updated_at = models.DateTimeField("更新时间", auto_now=True)
@@ -302,6 +303,39 @@ class Acupoint(models.Model):
 
     def __str__(self):
         return f"{self.name}（{self.meridian}）" if self.meridian else self.name
+
+
+class CaseProtocol(models.Model):
+    """常见病例的针灸治疗思路，供医师制定方案时参考。"""
+
+    name = models.CharField("病例名称", max_length=80, unique=True)
+    category = models.CharField("所属科别", max_length=40, blank=True)
+    syndrome = models.CharField("常见辨证", max_length=100, blank=True)
+    symptoms = models.TextField("典型表现", blank=True)
+    main_points = models.ManyToManyField(
+        Acupoint, blank=True, related_name="main_protocols", verbose_name="主穴"
+    )
+    adjunct_points = models.ManyToManyField(
+        Acupoint, blank=True, related_name="adjunct_protocols", verbose_name="配穴"
+    )
+    technique = models.CharField("操作手法", max_length=100, blank=True)
+    course_cycle = models.PositiveSmallIntegerField("建议疗程（天）", default=14)
+    frequency_per_week = models.PositiveSmallIntegerField("每周治疗次数", default=3)
+    notes = models.TextField("治疗要点", blank=True)
+    is_deleted = models.BooleanField("已删除", default=False)
+    created_at = models.DateTimeField("创建时间", auto_now_add=True)
+    updated_at = models.DateTimeField("更新时间", auto_now=True)
+
+    objects = SoftDeleteManager()
+    all_objects = models.Manager()
+
+    class Meta:
+        verbose_name = "常见病例治疗方案"
+        verbose_name_plural = "常见病例治疗方案"
+        ordering = ["category", "name"]
+
+    def __str__(self):
+        return f"{self.name}（{self.category}）" if self.category else self.name
 
 
 class TreatmentPlan(models.Model):

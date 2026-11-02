@@ -4,6 +4,7 @@ from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 from .models import (
     Acupoint,
     Appointment,
+    CaseProtocol,
     DoctorProfile,
     OperationLog,
     PlanAcupoint,
@@ -57,7 +58,15 @@ class AppointmentAdmin(admin.ModelAdmin):
 class AcupointAdmin(admin.ModelAdmin):
     list_display = ("name", "code", "meridian", "location", "is_deleted")
     list_filter = ("meridian",)
-    search_fields = ("name", "meridian")
+    search_fields = ("name", "meridian", "indications")
+
+
+@admin.register(CaseProtocol)
+class CaseProtocolAdmin(admin.ModelAdmin):
+    list_display = ("name", "category", "syndrome", "course_cycle", "is_deleted")
+    list_filter = ("category",)
+    search_fields = ("name", "syndrome", "symptoms")
+    filter_horizontal = ("main_points", "adjunct_points")
 
 
 class PlanAcupointInline(admin.TabularInline):

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}穴位速查 · 针灸预约系统{% endblock %}
+
+{% block content %}
+<div class="container page-shell">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Clinical knowledge</div>
+      <h1 class="page-title">穴位速查与主治</h1>
+      <p class="page-sub">收录 {{ points|length }} 个常用穴位，按归经分组展示定位与主治，可结合 {{ case_count }} 个常见病例方案使用。</p>
+    </div>
+    <a href="{% url 'knowledge_cases' %}" class="btn btn-jade"><i class="bi bi-journal-medical"></i> 常见病例方案</a>
+  </div>
+
+  <div class="panel mb-3">
+    <div class="panel-body">
+      <form method="get" class="filter-bar">
+        <div>
+          <label class="form-label">关键词</label>
+          <input type="text" name="q" value="{{ keyword }}" class="form-control" placeholder="穴位 / 归经 / 主治病症">
+        </div>
+        <div>
+          <label class="form-label">归经</label>
+          <select name="meridian" class="form-select">
+            <option value="">全部归经</option>
+            {% for item in meridians %}
+              <option value="{{ item }}" {% if item == meridian %}selected{% endif %}>{{ item }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-jade">查询</button>
+          <a href="{% url 'knowledge_acupoints' %}" class="btn btn-ghost">重置</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {% regroup points by meridian as groups %}
+  {% for group in groups %}
+    <div class="panel mb-3">
+      <div class="panel-head">
+        <h2>{{ group.grouper|default:"未归类" }}</h2>
+        <span class="text-muted-soft" style="font-size:.76rem">{{ group.list|length }} 个穴位</span>
+      </div>
+      <div class="panel-body">
+        <div class="row g-3">
+          {% for point in group.list %}
+            <div class="col-12 col-md-6 col-xl-4">
+              <div class="point-card">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                  <div class="d-flex align-items-baseline gap-2">
+                    <span class="point-card-name">{{ point.name }}</span>
+                    <span class="point-card-code">{{ point.code|default:"—" }}</span>
+                  </div>
+                  <span class="role-badge">{{ point.meridian|default:"未归类" }}</span>
+                </div>
+                <div class="point-card-row">
+                  <i class="bi bi-geo-alt"></i>
+                  <span>{{ point.location|default:"待补充定位" }}</span>
+                </div>
+                <div class="point-card-row indications">
+                  <i class="bi bi-activity"></i>
+                  <span>{{ point.indications|default:"待补充主治病症" }}</span>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  {% empty %}
+    <div class="panel">
+      <div class="empty-state">
+        <i class="bi bi-search empty-icon"></i>
+        没有匹配的穴位，请调整关键词或归经筛选。
+      </div>
+    </div>
+  {% endfor %}
+
+  <p class="knowledge-note">
+    <i class="bi bi-info-circle"></i>
+    本页内容用于课程项目教学演示与临床思路参考，具体取穴、手法与疗程须由执业医师辨证施治。
+  </p>
+</div>
+{% endblock %}

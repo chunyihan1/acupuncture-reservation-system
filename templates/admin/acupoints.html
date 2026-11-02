@@ -17,7 +17,7 @@
       <form method="get" class="filter-bar">
         <div>
           <label class="form-label">关键词</label>
-          <input type="text" name="q" value="{{ keyword }}" class="form-control" placeholder="穴位名称 / 归经">
+          <input type="text" name="q" value="{{ keyword }}" class="form-control" placeholder="穴位名称 / 归经 / 主治">
         </div>
         <div class="d-flex gap-2">
           <button type="submit" class="btn btn-jade">查询</button>
@@ -30,14 +30,15 @@
   <div class="panel">
     <div class="panel-body flush">
       <table class="table table-hover align-middle">
-        <thead><tr><th>穴位</th><th>代码</th><th>归经</th><th>定位</th><th class="text-end">操作</th></tr></thead>
+        <thead><tr><th>穴位</th><th>代码</th><th>归经</th><th>定位</th><th>主治</th><th class="text-end">操作</th></tr></thead>
         <tbody>
           {% for point in page_obj %}
             <tr>
               <td class="cell-strong">{{ point.name }}</td>
               <td>{{ point.code|default:"—" }}</td>
               <td><span class="role-badge">{{ point.meridian|default:"未归类" }}</span></td>
-              <td style="max-width:320px">{{ point.location|default:"—" }}</td>
+              <td style="max-width:260px">{{ point.location|default:"—" }}</td>
+              <td style="max-width:300px" class="text-muted-soft">{{ point.indications|default:"待补充"|truncatechars:48 }}</td>
               <td class="text-end">
                 <a href="{% url 'admin_acupoint_edit' point.pk %}" class="btn btn-sm btn-ghost">编辑</a>
                 <form method="post" action="{% url 'admin_acupoint_delete' point.pk %}" class="d-inline" onsubmit="return confirm('确认删除穴位 {{ point.name }}？')">
@@ -47,7 +48,7 @@
               </td>
             </tr>
           {% empty %}
-            <tr><td colspan="5"><div class="empty-state"><i class="bi bi-database empty-icon"></i>暂无穴位数据</div></td></tr>
+            <tr><td colspan="6"><div class="empty-state"><i class="bi bi-database empty-icon"></i>暂无穴位数据</div></td></tr>
           {% endfor %}
         </tbody>
       </table>

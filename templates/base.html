@@ -49,6 +49,9 @@
               <li class="nav-item"><a class="nav-link app-link {% if request.resolver_match.url_name == 'admin_logs' %}active{% endif %}" href="{% url 'admin_logs' %}">操作日志</a></li>
             {% endif %}
           {% endif %}
+          <li class="nav-item">
+            <a class="nav-link app-link {% if request.resolver_match.url_name == 'knowledge_acupoints' or request.resolver_match.url_name == 'knowledge_cases' %}active{% endif %}" href="{% url 'knowledge_acupoints' %}">知识库</a>
+          </li>
         </ul>
         <div class="d-flex align-items-center gap-2 pb-2 pb-lg-0">
           <span class="user-chip">

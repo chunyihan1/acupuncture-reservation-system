@@ -33,6 +33,7 @@ from .forms import (
 from .models import (
     Acupoint,
     Appointment,
+    CaseProtocol,
     DoctorProfile,
     OperationLog,
     PlanAcupoint,
@@ -931,7 +932,9 @@ def admin_acupoints(request):
     keyword = request.GET.get("q", "").strip()
     if keyword:
         acupoints = acupoints.filter(
-            Q(name__icontains=keyword) | Q(meridian__icontains=keyword)
+            Q(name__icontains=keyword)
+            | Q(meridian__icontains=keyword)
+            | Q(indications__icontains=keyword)
         )
     page = paginate(request, acupoints, per_page=15)
     return render(
@@ -973,6 +976,77 @@ def admin_acupoint_delete(request, acupoint_id):
         services.log_action(request, "删除穴位（逻辑删除）", target=point.name)
         messages.success(request, "穴位已删除")
     return redirect("admin_acupoints")
+
+
+# ---------------------------------------------------------------- 临床知识库
+
+
+@login_required
+def knowledge_acupoints(request):
+    keyword = request.GET.get("q", "").strip()
+    meridian = request.GET.get("meridian", "").strip()
+    points = Acupoint.objects.all()
+    if keyword:
+        points = points.filter(
+            Q(name__icontains=keyword)
+            | Q(meridian__icontains=keyword)
+            | Q(location__icontains=keyword)
+            | Q(indications__icontains=keyword)
+        )
+    if meridian:
+        points = points.filter(meridian=meridian)
+    points = points.order_by("meridian", "code", "name")
+    meridians = (
+        Acupoint.objects.exclude(meridian="")
+        .values_list("meridian", flat=True)
+        .distinct()
+        .order_by("meridian")
+    )
+    return render(
+        request,
+        "knowledge/acupoints.html",
+        {
+            "points": points,
+            "meridians": meridians,
+            "keyword": keyword,
+            "meridian": meridian,
+            "case_count": CaseProtocol.objects.count(),
+        },
+    )
+
+
+@login_required
+def knowledge_cases(request):
+    keyword = request.GET.get("q", "").strip()
+    category = request.GET.get("category", "").strip()
+    cases = CaseProtocol.objects.prefetch_related("main_points", "adjunct_points")
+    if keyword:
+        cases = cases.filter(
+            Q(name__icontains=keyword)
+            | Q(syndrome__icontains=keyword)
+            | Q(symptoms__icontains=keyword)
+            | Q(main_points__name__icontains=keyword)
+            | Q(adjunct_points__name__icontains=keyword)
+        ).distinct()
+    if category:
+        cases = cases.filter(category=category)
+    categories = (
+        CaseProtocol.objects.exclude(category="")
+        .values_list("category", flat=True)
+        .distinct()
+        .order_by("category")
+    )
+    return render(
+        request,
+        "knowledge/cases.html",
+        {
+            "cases": cases,
+            "categories": categories,
+            "keyword": keyword,
+            "category": category,
+            "point_count": Acupoint.objects.count(),
+        },
+    )
 
 
 @manager_required

@@ -4,9 +4,11 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from clinic import services
+from clinic.knowledge_data import sync_knowledge
 from clinic.models import (
     Acupoint,
     Appointment,
+    CaseProtocol,
     DoctorProfile,
     OperationLog,
     PlanAcupoint,
@@ -96,6 +98,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING("正在清空现有业务数据..."))
             TreatmentRecord.all_objects.all().delete()
             TreatmentPlan.all_objects.all().delete()
+            CaseProtocol.all_objects.all().delete()
             Acupoint.all_objects.all().delete()
             Schedule.objects.all().delete()
             Appointment.all_objects.all().delete()
@@ -126,6 +129,13 @@ class Command(BaseCommand):
                 defaults={"code": code, "meridian": meridian, "location": location},
             )
             points[name] = point
+
+        updated_points, cases_created, _, missing = sync_knowledge()
+        if missing:
+            self.stdout.write(self.style.WARNING(f"以下穴位未在库中，已跳过：{'、'.join(missing)}"))
+        self.stdout.write(
+            f"知识库已同步：{updated_points} 个穴位主治、{cases_created} 个常见病例方案"
+        )
 
         admin = User.objects.create_user(
             username="admin",

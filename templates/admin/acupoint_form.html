@@ -37,6 +37,12 @@
             <label class="form-label" for="{{ form.location.id_for_label }}">定位描述</label>
             {{ form.location }}
           </div>
+          <div class="col-12">
+            <label class="form-label" for="{{ form.indications.id_for_label }}">主治病症</label>
+            {{ form.indications }}
+            <div class="form-text">用顿号分隔，如“头痛、眩晕、失眠”，将展示在穴位速查与方案制定页面。</div>
+            {% for error in form.indications.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+          </div>
         </div>
         <div class="d-flex gap-2 mt-4">
           <button type="submit" class="btn btn-jade px-4">保存穴位</button>

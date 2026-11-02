@@ -13,6 +13,10 @@ urlpatterns = [
     path("appointments/<int:appointment_id>/", views.appointment_detail, name="appointment_detail"),
     path("records/<int:record_id>/", views.record_detail, name="record_detail"),
 
+    # 临床知识库
+    path("knowledge/acupoints/", views.knowledge_acupoints, name="knowledge_acupoints"),
+    path("knowledge/cases/", views.knowledge_cases, name="knowledge_cases"),
+
     # 患者端
     path("patient/doctors/", views.doctor_list, name="doctor_list"),
     path(
