@@ -1592,6 +1592,97 @@ select.form-select {
   }
 }
 
+/* 手机与平板适配 */
+@media (max-width: 991.98px) {
+  /* 表格在窄屏内部横向滚动，避免撑破整页 */
+  .panel-body.flush {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .panel-body.flush .table {
+    min-width: 640px;
+  }
+
+  .page-head {
+    align-items: flex-start;
+  }
+
+  .page-head > div:first-child {
+    width: 100%;
+  }
+
+  .page-head .btn {
+    min-height: 38px;
+  }
+
+  .chart-box {
+    height: 240px;
+  }
+
+  .chart-box.small {
+    height: 210px;
+  }
+}
+
+@media (max-width: 576px) {
+  body {
+    font-size: 13.5px;
+  }
+
+  .page-shell {
+    padding: 1.2rem 0 2.2rem;
+  }
+
+  .page-head > div:last-child.d-flex {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .page-head > div:last-child.d-flex .btn {
+    flex: 1 1 42%;
+  }
+
+  .panel-head {
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    padding: 0.95rem 1rem 0.8rem;
+  }
+
+  .panel-body.flush .table {
+    min-width: 560px;
+  }
+
+  .table td, .table thead th {
+    padding: 0.7rem 0.7rem;
+    font-size: 0.8rem;
+  }
+
+  .stat-card {
+    padding: 0.95rem 1rem;
+  }
+
+  .stat-card .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .doctor-card {
+    padding: 1rem;
+  }
+
+  .guide-step {
+    padding: 0.65rem 0.75rem;
+  }
+
+  .diet-card {
+    padding: 0.85rem 0.9rem;
+  }
+
+  .app-footer {
+    font-size: 0.72rem;
+  }
+}
+
 /* 打印 */
 @media print {
   .app-navbar, .app-footer, .btn, .pagination-bar {

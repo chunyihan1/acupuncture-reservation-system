@@ -60,17 +60,25 @@ if errorlevel 1 (
     echo [4/4] Database already initialized, skipping demo data.
 )
 
+set "LANIP="
+for /f "tokens=2 delims=:" %%a in ('ipconfig ^| findstr /r /c:"IPv4.*192\.168\." /c:"IPv4.*10\." /c:"IPv4.*172\."') do if not defined LANIP set "LANIP=%%a"
+if defined LANIP set "LANIP=%LANIP: =%"
+
 echo.
 echo ----------------------------------------------------------
-echo   URL      : http://127.0.0.1:8000
-echo   Accounts : patient1 / doctor1 / admin / sysadmin
-echo   Password : demo12345
+echo   Local URL : http://127.0.0.1:8000
+if defined LANIP echo   Phone URL : http://!LANIP!:8000
+if not defined LANIP echo   Phone URL : check your LAN IP with "ipconfig"
+echo   Accounts  : patient1 / doctor1 / admin / sysadmin
+echo   Password  : demo12345
+echo   Phone must be on the same Wi-Fi; allow Python in Windows
+echo   Firewall if the page cannot be opened.
 echo   Close this window to stop the server.
 echo ----------------------------------------------------------
 echo.
 
 start "" /min cmd /c "timeout /t 3 /nobreak >nul && start http://127.0.0.1:8000/"
-"!PYTHON!" manage.py runserver 127.0.0.1:8000
+"!PYTHON!" manage.py runserver 0.0.0.0:8000
 goto :end
 
 :failed

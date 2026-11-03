@@ -22,6 +22,10 @@ ALLOWED_HOSTS = [
     if h.strip()
 ]
 
+if DEBUG:
+    # 开发环境放开主机校验，便于同一局域网内的手机/平板访问
+    ALLOWED_HOSTS.append("*")
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
