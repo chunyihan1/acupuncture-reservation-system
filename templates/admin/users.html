@@ -10,7 +10,10 @@
       <h1 class="page-title">用户账号管理</h1>
       <p class="page-sub">维护患者、医师与管理员账号；删除采用逻辑删除，保留历史业务数据。</p>
     </div>
-    <a href="{% url 'admin_user_create' %}" class="btn btn-jade"><i class="bi bi-person-plus"></i> 新增账号</a>
+    <div class="d-flex gap-2">
+      <a href="{% url 'admin_user_create' %}" class="btn btn-ghost"><i class="bi bi-person-plus"></i> 新增账号</a>
+      <a href="{% url 'admin_doctor_create' %}" class="btn btn-jade"><i class="bi bi-person-badge"></i> 添加医师</a>
+    </div>
   </div>
 
   <div class="panel mb-3">

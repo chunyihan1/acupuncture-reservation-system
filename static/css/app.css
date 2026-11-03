@@ -1386,6 +1386,146 @@ select.form-select {
   }
 }
 
+/* 患者指南：流程步骤与食疗卡片 */
+.guide-steps {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.guide-step {
+  display: flex;
+  gap: 0.8rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: linear-gradient(160deg, #ffffff, #f7fbf9);
+}
+
+.guide-num {
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(140deg, var(--jade), var(--jade-dark));
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.guide-step strong {
+  font-size: 0.9rem;
+}
+
+.guide-step p {
+  margin: 0.1rem 0 0;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  line-height: 1.65;
+}
+
+.guide-tip h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.86rem;
+  margin: 0.2rem 0 0.35rem;
+}
+
+.guide-tip h3 i {
+  color: var(--jade);
+}
+
+.guide-tip ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  line-height: 1.75;
+}
+
+.guide-tip + .guide-tip {
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
+  border-top: 1px dashed var(--line);
+}
+
+.guide-warning {
+  margin-top: 0.9rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  background: #fdf3df;
+  color: #8a6516;
+  font-size: 0.76rem;
+}
+
+.diet-card {
+  height: 100%;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #ffffff;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.diet-card:hover {
+  transform: translateY(-2px);
+  border-color: #cfe5dd;
+  box-shadow: 0 16px 30px -24px rgba(20, 55, 46, 0.55);
+}
+
+.diet-card h3 {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.diet-principle {
+  margin: 0.35rem 0 0.6rem;
+  font-size: 0.76rem;
+  color: var(--jade);
+}
+
+.diet-block {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  align-items: center;
+  margin-bottom: 0.45rem;
+}
+
+.diet-label {
+  font-size: 0.74rem;
+  color: var(--ink-soft);
+  background: #f3f7f5;
+  border-radius: 6px;
+  padding: 0.08rem 0.4rem;
+}
+
+.diet-chip {
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.74rem;
+}
+
+.diet-chip.good {
+  background: var(--jade-soft);
+  color: var(--jade-dark);
+}
+
+.diet-chip.bad {
+  background: #fdeceb;
+  color: #96362f;
+}
+
+.diet-recipes {
+  margin: 0.55rem 0 0;
+  padding-left: 1.05rem;
+  font-size: 0.76rem;
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+
 /* 登录页氛围 */
 .auth-body {
   background:

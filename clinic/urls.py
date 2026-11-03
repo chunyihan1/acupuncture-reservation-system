@@ -32,6 +32,7 @@ urlpatterns = [
         name="cancel_appointment",
     ),
     path("patient/records/", views.my_records, name="my_records"),
+    path("patient/guide/", views.patient_guide, name="patient_guide"),
 
     # 医师端
     path("doctor/dashboard/", views.doctor_dashboard, name="doctor_dashboard"),
@@ -74,6 +75,7 @@ urlpatterns = [
         name="export_appointments",
     ),
     path("manage/users/", views.admin_users, name="admin_users"),
+    path("manage/doctors/new/", views.admin_doctor_create, name="admin_doctor_create"),
     path("manage/users/new/", views.admin_user_create, name="admin_user_create"),
     path("manage/users/<int:user_id>/edit/", views.admin_user_edit, name="admin_user_edit"),
     path(

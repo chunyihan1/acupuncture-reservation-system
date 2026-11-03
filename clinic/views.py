@@ -8,6 +8,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Count, Q
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -21,6 +22,7 @@ from .forms import (
     AcupointForm,
     AppointmentFilterForm,
     AppointmentForm,
+    DoctorCreateForm,
     DoctorProfileForm,
     LoginForm,
     PlanForm,
@@ -44,6 +46,7 @@ from .models import (
     User,
 )
 from .permissions import can_view_patient_data, doctor_required, manager_required, patient_required, role_required
+from .knowledge_data import DIETARY_GUIDES
 
 
 # ---------------------------------------------------------------- 认证与首页
@@ -336,6 +339,15 @@ def record_detail(request, record_id):
             "main_points": record.plan.main_points.select_related("acupoint"),
             "adjunct_points": record.plan.adjunct_points.select_related("acupoint"),
         },
+    )
+
+
+@patient_required
+def patient_guide(request):
+    return render(
+        request,
+        "patient/guide.html",
+        {"diet_guides": DIETARY_GUIDES, "case_count": CaseProtocol.objects.count()},
     )
 
 
@@ -778,6 +790,35 @@ def admin_users(request):
 def _guard_sysadmin(request, target):
     if target.role == Role.SYSADMIN and request.user.role != Role.SYSADMIN:
         raise PermissionDenied("只有系统运维管理员可管理该账号")
+
+
+@manager_required
+def admin_doctor_create(request):
+    form = DoctorCreateForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        with transaction.atomic():
+            doctor = form.save(commit=False)
+            doctor.role = Role.DOCTOR
+            doctor.set_password(form.cleaned_data["password"])
+            doctor.save()
+            DoctorProfile.objects.create(
+                user=doctor,
+                department=form.cleaned_data["department"] or "针灸科",
+                title=form.cleaned_data.get("title", ""),
+                specialty=form.cleaned_data.get("specialty", ""),
+                room=form.cleaned_data.get("room"),
+            )
+        services.log_action(
+            request,
+            "新增医师",
+            target=doctor.username,
+            detail=f"{doctor.display_name} · {doctor.doctor_profile.department}",
+        )
+        messages.success(
+            request, f"医师 {doctor.display_name} 已创建，请前往排班管理为其安排出诊时间"
+        )
+        return redirect("admin_users")
+    return render(request, "admin/doctor_form.html", {"form": form})
 
 
 @manager_required

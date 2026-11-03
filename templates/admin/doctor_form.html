@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}添加医师 · 针灸预约系统{% endblock %}
+
+{% block content %}
+<div class="container page-shell">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Doctor onboarding</div>
+      <h1 class="page-title">添加针灸医师</h1>
+      <p class="page-sub">创建医师账号并同步生成执业档案，创建后即可在排班管理中安排出诊。</p>
+    </div>
+    <a href="{% url 'admin_users' %}" class="btn btn-sm btn-ghost"><i class="bi bi-arrow-left"></i> 返回账号列表</a>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-8">
+      <div class="panel">
+        <div class="panel-head"><h2>医师信息</h2></div>
+        <div class="panel-body">
+          <form method="post" novalidate>
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+              <div class="alert alert-danger py-2" style="font-size:.82rem">{{ form.non_field_errors.0 }}</div>
+            {% endif %}
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="{{ form.username.id_for_label }}">登录账号</label>
+                {{ form.username }}
+                {% for error in form.username.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="{{ form.name.id_for_label }}">真实姓名</label>
+                {{ form.name }}
+                {% for error in form.name.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="{{ form.phone.id_for_label }}">联系电话</label>
+                {{ form.phone }}
+                {% for error in form.phone.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="{{ form.gender.id_for_label }}">性别</label>
+                {{ form.gender }}
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="{{ form.password.id_for_label }}">初始密码</label>
+                {{ form.password }}
+                {% for error in form.password.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+                <div class="form-text">不少于 8 位，建议包含字母与数字。</div>
+              </div>
+              <div class="col-12"><hr class="my-1"><div class="text-muted-soft" style="font-size:.76rem">执业档案</div></div>
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="{{ form.department.id_for_label }}">所属科室</label>
+                {{ form.department }}
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="{{ form.title.id_for_label }}">职称</label>
+                {{ form.title }}
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="{{ form.specialty.id_for_label }}">擅长方向</label>
+                {{ form.specialty }}
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="{{ form.room.id_for_label }}">治疗室</label>
+                {{ form.room }}
+              </div>
+            </div>
+            <button type="submit" class="btn btn-jade mt-3 px-4">创建医师</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-4">
+      <div class="panel">
+        <div class="panel-head"><h2>后续步骤</h2></div>
+        <div class="panel-body" style="font-size:.82rem;color:var(--ink-soft)">
+          <p><strong>1. 安排排班</strong><br>前往排班管理为该医师设置出诊日期与号源容量。</p>
+          <p><strong>2. 医师登录</strong><br>医师使用账号密码登录，可在个人资料中补充职称与擅长方向。</p>
+          <p class="mb-0"><strong>3. 患者预约</strong><br>排班开放后，患者即可在预约医师页面看到该医师并选择时段。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

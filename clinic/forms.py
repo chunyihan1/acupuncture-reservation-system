@@ -12,6 +12,7 @@ from .models import (
     Schedule,
     TreatmentPlan,
     TreatmentRecord,
+    TreatmentRoom,
     User,
 )
 
@@ -177,6 +178,39 @@ class UserCreateForm(StyledFormMixin, forms.ModelForm):
             (Role.ADMIN, "门诊管理员"),
             (Role.SYSADMIN, "系统运维/教学管理员"),
         ]
+        self._style()
+
+    def clean_phone(self):
+        phone = self.cleaned_data.get("phone") or None
+        if phone and User.objects.filter(phone=phone).exists():
+            raise forms.ValidationError("该手机号已被使用")
+        return phone
+
+    def clean_password(self):
+        password = self.cleaned_data["password"]
+        if len(password) < 8:
+            raise forms.ValidationError("密码长度不得少于 8 位")
+        return password
+
+
+class DoctorCreateForm(StyledFormMixin, forms.ModelForm):
+    password = forms.CharField(label="初始密码", widget=forms.PasswordInput)
+    department = forms.CharField(label="所属科室", initial="针灸科")
+    title = forms.CharField(label="职称", required=False, help_text="如：主任医师、主治医师")
+    specialty = forms.CharField(label="擅长方向", required=False, help_text="如：颈肩腰腿痛、失眠调理")
+    room = forms.ModelChoiceField(
+        label="治疗室",
+        queryset=TreatmentRoom.objects.filter(is_deleted=False),
+        required=False,
+        empty_label="暂不分配",
+    )
+
+    class Meta:
+        model = User
+        fields = ("username", "name", "phone", "gender")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._style()
 
     def clean_phone(self):

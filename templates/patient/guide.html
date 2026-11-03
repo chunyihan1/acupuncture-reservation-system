@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}针灸治疗指南 · 针灸预约系统{% endblock %}
+
+{% block content %}
+<div class="container page-shell">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Patient guide</div>
+      <h1 class="page-title">针灸治疗指南与食疗参考</h1>
+      <p class="page-sub">了解一次针灸治疗的完整过程、治疗前后注意事项，以及常见病症的日常饮食调养建议。</p>
+    </div>
+    <a href="{% url 'doctor_list' %}" class="btn btn-jade"><i class="bi bi-calendar2-plus"></i> 预约医师</a>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-7">
+      <div class="panel h-100">
+        <div class="panel-head"><h2>针灸是怎么进行的</h2><span class="text-muted-soft" style="font-size:.76rem">单次约 30–45 分钟</span></div>
+        <div class="panel-body">
+          <div class="guide-steps">
+            <div class="guide-step">
+              <span class="guide-num">1</span>
+              <div>
+                <strong>预约与初诊</strong>
+                <p>选择医师与时段完成预约。首次就诊时，医师会询问病史、症状与用药情况，并进行辨证。</p>
+              </div>
+            </div>
+            <div class="guide-step">
+              <span class="guide-num">2</span>
+              <div>
+                <strong>辨证取穴</strong>
+                <p>医师根据证型确定主穴与配穴，通常选取 6–12 个穴位，并说明本次治疗思路。</p>
+              </div>
+            </div>
+            <div class="guide-step">
+              <span class="guide-num">3</span>
+              <div>
+                <strong>针刺操作</strong>
+                <p>穴位局部消毒后进针，多数人仅有轻微刺痛；得气时可能出现酸、胀、麻、沉等感觉，属正常针感。</p>
+              </div>
+            </div>
+            <div class="guide-step">
+              <span class="guide-num">4</span>
+              <div>
+                <strong>留针观察</strong>
+                <p>一般留针 20–30 分钟，期间医师会巡视并根据反应调整；可配合艾灸、电针等辅助方式。</p>
+              </div>
+            </div>
+            <div class="guide-step">
+              <span class="guide-num">5</span>
+              <div>
+                <strong>起针与疗程</strong>
+                <p>起针后按压针孔片刻，留观 10 分钟无不适即可离开。多数病症以 7–14 天为一疗程，每周 2–3 次。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-5">
+      <div class="panel h-100">
+        <div class="panel-head"><h2>治疗前后注意事项</h2></div>
+        <div class="panel-body">
+          <div class="guide-tip">
+            <h3><i class="bi bi-sunrise"></i> 治疗前</h3>
+            <ul>
+              <li>避免空腹或过饱，餐后 1 小时左右为宜。</li>
+              <li>避免剧烈运动、熬夜与饮酒后就诊。</li>
+              <li>穿宽松、便于暴露治疗部位的衣物。</li>
+              <li>如实告知抗凝药物、晕针史与怀孕情况。</li>
+            </ul>
+          </div>
+          <div class="guide-tip">
+            <h3><i class="bi bi-cup-hot"></i> 治疗后</h3>
+            <ul>
+              <li>留观 10 分钟，无头晕心慌再离开。</li>
+              <li>针刺部位当日避免用力揉搓与长时间泡水。</li>
+              <li>注意保暖，避免空调直吹。</li>
+              <li>轻微酸胀、局部小淤青多可自行消退。</li>
+            </ul>
+          </div>
+          <div class="guide-warning">
+            <i class="bi bi-exclamation-triangle"></i>
+            出现持续头晕、心慌、出冷汗或针孔红肿热痛，请立即告知医护人员或及时就医。
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel mt-3">
+    <div class="panel-head">
+      <h2>常见病症食疗参考</h2>
+      <span class="text-muted-soft" style="font-size:.76rem">日常调养建议，不能替代规范治疗</span>
+    </div>
+    <div class="panel-body">
+      <div class="row g-3">
+        {% for guide in diet_guides %}
+          <div class="col-12 col-xl-6">
+            <div class="diet-card">
+              <div class="d-flex justify-content-between align-items-start gap-2">
+                <h3>{{ guide.name }}</h3>
+                <span class="role-badge">{{ guide.category }}</span>
+              </div>
+              <div class="diet-principle">调养原则：{{ guide.principle }}</div>
+              <div class="diet-block">
+                <span class="diet-label">宜食</span>
+                {% for item in guide.recommended %}<span class="diet-chip good">{{ item }}</span>{% endfor %}
+              </div>
+              <div class="diet-block">
+                <span class="diet-label">少食忌口</span>
+                {% for item in guide.avoid %}<span class="diet-chip bad">{{ item }}</span>{% endfor %}
+              </div>
+              <ul class="diet-recipes">
+                {% for recipe in guide.recipes %}<li>{{ recipe }}</li>{% endfor %}
+              </ul>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <p class="knowledge-note">
+    <i class="bi bi-info-circle"></i>
+    食疗建议仅作日常辅助调养，具体饮食与用药请遵医嘱；如症状加重，请及时复诊。想看穴位与病例方案，可前往「知识库」。
+  </p>
+</div>
+{% endblock %}

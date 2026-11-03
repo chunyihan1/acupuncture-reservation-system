@@ -33,6 +33,7 @@
             <li class="nav-item"><a class="nav-link app-link {% if request.resolver_match.url_name == 'doctor_list' or request.resolver_match.url_name == 'doctor_schedules' or request.resolver_match.url_name == 'book_appointment' %}active{% endif %}" href="{% url 'doctor_list' %}">预约医师</a></li>
             <li class="nav-item"><a class="nav-link app-link {% if request.resolver_match.url_name == 'patient_appointments' or request.resolver_match.url_name == 'appointment_detail' %}active{% endif %}" href="{% url 'patient_appointments' %}">我的预约</a></li>
             <li class="nav-item"><a class="nav-link app-link {% if request.resolver_match.url_name == 'my_records' or request.resolver_match.url_name == 'record_detail' %}active{% endif %}" href="{% url 'my_records' %}">治疗档案</a></li>
+            <li class="nav-item"><a class="nav-link app-link {% if request.resolver_match.url_name == 'patient_guide' %}active{% endif %}" href="{% url 'patient_guide' %}">针灸指南</a></li>
           {% elif user.is_doctor %}
             <li class="nav-item"><a class="nav-link app-link {% if request.resolver_match.url_name == 'doctor_dashboard' %}active{% endif %}" href="{% url 'doctor_dashboard' %}">工作台</a></li>
             <li class="nav-item"><a class="nav-link app-link {% if request.resolver_match.url_name == 'doctor_appointments' or request.resolver_match.url_name == 'doctor_appointment_detail' or request.resolver_match.url_name == 'plan_edit' or request.resolver_match.url_name == 'record_create' %}active{% endif %}" href="{% url 'doctor_appointments' %}">预约接诊</a></li>
