@@ -95,10 +95,9 @@ a:hover {
 
 .brand-sub {
   display: block;
-  font-size: 0.66rem;
-  letter-spacing: 0.18em;
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
   color: var(--ink-soft);
-  text-transform: uppercase;
   font-family: "Microsoft YaHei", sans-serif;
   font-weight: 400;
 }
@@ -171,9 +170,8 @@ a:hover {
 }
 
 .eyebrow {
-  font-size: 0.72rem;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
+  font-size: 0.74rem;
+  letter-spacing: 0.04em;
   color: var(--gold);
   font-weight: 600;
   margin-bottom: 0.15rem;
